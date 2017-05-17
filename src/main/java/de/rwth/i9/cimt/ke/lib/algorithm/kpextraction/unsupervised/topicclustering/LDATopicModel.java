@@ -2,8 +2,11 @@ package de.rwth.i9.cimt.ke.lib.algorithm.kpextraction.unsupervised.topicclusteri
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,23 +31,22 @@ import cc.mallet.types.InstanceList;
 public class LDATopicModel {
 	private static final Logger log = LoggerFactory.getLogger(LDATopicModel.class);
 	private static ParallelTopicModel model = null;
-	private static ArrayList<Pipe> pipeList = null;
+	private static SerialPipes pipes = null;
 	public static final int numTopics = 50;
 
 	public static List<Double> computeTopicProbability(String cimtHome, String documentContent) {
-		if (model == null) {
+		if (model == null || pipes == null) {
 			try {
 				loadTopicModel(cimtHome);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				log.error(ExceptionUtils.getStackTrace(e));
 			}
 
 		}
 		List<Double> topicIdProbMap = new ArrayList<>();
-		if (model != null) {
+		if (model != null && pipes != null) {
 			// Create a new instance named "test instance" with empty target and source fields.
-			InstanceList instances = new InstanceList(new SerialPipes(pipeList));
+			InstanceList instances = new InstanceList(pipes);
 			TopicInferencer inferencer = model.getInferencer();
 			instances.addThruPipe(new Instance(documentContent, null, "test instance", null));
 			double[] testProbabilities = inferencer.getSampledDistribution(instances.get(0), 10, 1, 5);
@@ -57,37 +59,101 @@ public class LDATopicModel {
 	}
 
 	private static void loadTopicModel(String cimtHome) throws IOException {
-		// Begin by importing documents from text to feature sequences
-		pipeList = new ArrayList<Pipe>();
 
-		// Pipes: lowercase, tokenize, remove stopwords, map to features
-		pipeList.add(new CharSequenceLowercase());
-		pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
-		pipeList.add(new TokenSequenceRemoveStopwords(new File(cimtHome + "/lda/stoplists/en.txt"), "UTF-8", false,
-				false, false));
-		pipeList.add(new TokenSequence2FeatureSequence());
+		FileInputStream modelfis = null;
+		ObjectInputStream modelois = null;
+		FileOutputStream modelfos = null;
+		ObjectOutputStream modeloos = null;
+		FileInputStream pipesfis = null;
+		ObjectInputStream pipesois = null;
+		FileOutputStream pipesfos = null;
+		ObjectOutputStream pipesoos = null;
+		try {
 
-		InstanceList instances = new InstanceList(new SerialPipes(pipeList));
+			File pipesModel = new File(cimtHome + "/lda/model/ldapipes.ser");
+			if (pipesModel.exists()) {
+				pipesfis = new FileInputStream(pipesModel);
+				pipesois = new ObjectInputStream(pipesfis);
+				pipes = (SerialPipes) pipesois.readObject();
+			} else {
+				ArrayList<Pipe> pipeList = new ArrayList<Pipe>();
 
-		Reader fileReader = new InputStreamReader(
-				new FileInputStream(new File(cimtHome + "/lda/corpus/palm_corpus_ta.txt")), "UTF-8");
-		instances
-				.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1)); // data, label, name fields
+				// Pipes: lowercase, tokenize, remove stopwords, map to features
+				pipeList.add(new CharSequenceLowercase());
+				pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));
+				pipeList.add(new TokenSequenceRemoveStopwords(new File(cimtHome + "/lda/stoplists/en.txt"), "UTF-8",
+						false, false, false));
+				pipeList.add(new TokenSequence2FeatureSequence());
+				pipes = new SerialPipes(pipeList);
 
-		// Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
-		//  Note that the first parameter is passed as the sum over topics, while
-		//  the second is 
-		model = new ParallelTopicModel(numTopics, 1.0, 0.01);
-		model.addInstances(instances);
+				pipesModel.createNewFile();
+				pipesfos = new FileOutputStream(pipesModel.getPath());
+				pipesoos = new ObjectOutputStream(pipesfos);
+				pipesoos.writeObject(pipes);
+			}
 
-		// Use two parallel samplers, which each look at one half the corpus and combine
-		//  statistics after every iteration.
-		model.setNumThreads(2);
+			File ldaModel = new File(cimtHome + "/lda/model/ldamodel.ser");
+			if (ldaModel.exists()) {
+				modelfis = new FileInputStream(ldaModel.getPath());
+				modelois = new ObjectInputStream(modelfis);
+				model = (ParallelTopicModel) modelois.readObject();
 
-		// Run the model for 50 iterations and stop (this is for testing only, 
-		//  for real applications, use 1000 to 2000 iterations)
-		model.setNumIterations(1000);
-		model.estimate();
+			} else {
+
+				InstanceList instances = new InstanceList(pipes);
+				Reader fileReader = new InputStreamReader(
+						new FileInputStream(new File(cimtHome + "/lda/corpus/palm_corpus_ta.txt")), "UTF-8");
+				instances.addThruPipe(
+						new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1)); // data, label, name fields
+				model = new ParallelTopicModel(numTopics, 1.0, 0.01);
+				model.addInstances(instances);
+
+				// Use two parallel samplers, which each look at one half the corpus and combine
+				//  statistics after every iteration.
+				model.setNumThreads(2);
+
+				// Run the model for 50 iterations and stop (this is for testing only, 
+				//  for real applications, use 1000 to 2000 iterations)
+				model.setNumIterations(1000);
+				model.estimate();
+
+				ldaModel.createNewFile();
+				modelfos = new FileOutputStream(ldaModel.getPath());
+				modeloos = new ObjectOutputStream(modelfos);
+				modeloos.writeObject(model);
+			}
+
+		} catch (IOException ex) {
+			log.error("Could not read model from file: " + ex);
+		} catch (ClassNotFoundException ex) {
+			log.error("Could not load the model: " + ex);
+		} finally {
+			if (modelois != null) {
+				modelois.close();
+			}
+			if (modelfis != null) {
+				modelfis.close();
+			}
+			if (modeloos != null) {
+				modeloos.close();
+			}
+			if (modelfos != null) {
+				modelfos.close();
+			}
+			if (pipesois != null) {
+				pipesois.close();
+			}
+			if (pipesfis != null) {
+				pipesfis.close();
+			}
+			if (pipesoos != null) {
+				pipesoos.close();
+			}
+			if (pipesfos != null) {
+				pipesfos.close();
+			}
+
+		}
 
 	}
 

@@ -124,12 +124,14 @@ public class NLPUtil {
 	public static Map<String, Integer> splitTextByStopWords(String textContent, NLP nlp) {
 		Map<String, Integer> tokenCandidatesFreq = new HashMap<>();
 		String tokenCandidate = "";
+		boolean tokenAdded = false;
 		List<String> candidateSubTokens = new ArrayList<>();
 		for (String sentence : nlp.detectSentences(textContent)) {
 			String[] tokens = nlp.tokenize(sentence);
 			for (int iter = 0; iter < tokens.length; iter++) {
 				if (!StopWordsEn.isStopWord(tokens[iter])) {
 					candidateSubTokens.add(tokens[iter].toLowerCase().trim());
+					tokenAdded = false;
 				} else {
 					tokenCandidate = String.join(" ", candidateSubTokens);
 					if (!tokenCandidate.isEmpty()) {
@@ -139,10 +141,21 @@ public class NLPUtil {
 							tokenCandidatesFreq.put(tokenCandidate, tokenCandidatesFreq.get(tokenCandidate) + 1);
 						}
 					}
-
+					tokenAdded = true;
 					candidateSubTokens = new ArrayList<>();
 				}
 
+			}
+		}
+		//add last candidate token
+		if (!tokenAdded) {
+			tokenCandidate = String.join(" ", candidateSubTokens);
+			if (!tokenCandidate.isEmpty()) {
+				if (!tokenCandidatesFreq.containsKey(tokenCandidate)) {
+					tokenCandidatesFreq.put(tokenCandidate, 1);
+				} else {
+					tokenCandidatesFreq.put(tokenCandidate, tokenCandidatesFreq.get(tokenCandidate) + 1);
+				}
 			}
 		}
 
