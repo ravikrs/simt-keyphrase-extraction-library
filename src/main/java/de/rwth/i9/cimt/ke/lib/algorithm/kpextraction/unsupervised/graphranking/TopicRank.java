@@ -68,6 +68,9 @@ public class TopicRank {
 			int minOffset = Integer.MAX_VALUE;
 			for (String candidate : candidates) {
 				List<Integer> offsetPos = tokenOffsetPostionMap.get(candidate);
+				if (offsetPos == null) {
+					continue;
+				}
 				Collections.sort(offsetPos);
 				if (minOffset > offsetPos.get(0)) {
 					firstOccurredCandidate = candidate;

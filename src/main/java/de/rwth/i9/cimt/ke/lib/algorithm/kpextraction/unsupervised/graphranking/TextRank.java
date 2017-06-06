@@ -3,8 +3,10 @@ package de.rwth.i9.cimt.ke.lib.algorithm.kpextraction.unsupervised.graphranking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -90,7 +92,8 @@ public class TextRank {
 		List<String> returnedKeywords = prScoreMap.entrySet().stream().map(x -> x.getKey())
 				.collect(Collectors.toList());
 
-		List<String> nonRetainedkeywords = new ArrayList<String>();
+		Set<String> nonRetainedkeywords = new HashSet<String>();
+		Set<String> tokenAdded = new HashSet<>();
 		for (String sentence : sentencesList) {
 			String keyphrase = "";
 			double keyphraseScore = 0.0;
@@ -103,6 +106,10 @@ public class TextRank {
 					phraseCount++;
 					continue;
 				} else if (phraseCount > 1) {
+					if (tokenAdded.contains(keyphrase.trim())) {
+						continue;
+					}
+					tokenAdded.add(keyphrase.trim());
 					returnedKeyphrases.add(new Keyword(keyphrase.trim(), keyphraseScore));
 					nonRetainedkeywords.addAll(Arrays.asList(keyphrase.trim().split("\\s+")));
 				}
