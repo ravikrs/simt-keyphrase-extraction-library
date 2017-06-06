@@ -102,7 +102,7 @@ public class LDATopicModel {
 
 				InstanceList instances = new InstanceList(pipes);
 				Reader fileReader = new InputStreamReader(
-						new FileInputStream(new File(cimtHome + "/lda/corpus/palm_corpus_ta.txt")), "UTF-8");
+						new FileInputStream(new File(cimtHome + "/lda/corpus/ldacorpus.txt")), "UTF-8");
 				instances.addThruPipe(
 						new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1)); // data, label, name fields
 				model = new ParallelTopicModel(numTopics, 1.0, 0.01);
