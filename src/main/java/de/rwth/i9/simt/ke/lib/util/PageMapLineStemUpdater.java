@@ -8,7 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import de.rwth.i9.cimt.nlp.util.StemmerEn;
+import de.rwth.i9.simt.nlp.util.StemmerEn;
 
 public class PageMapLineStemUpdater {
 

@@ -23,8 +23,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>de.rwth.i9.cimt</groupId>
-			<artifactId>cimt-nlp-impl</artifactId>
+			<groupId>de.rwth.i9.simt</groupId>
+			<artifactId>simt-nlp-impl</artifactId>
 			<version>${simt.version}</version>
 		</dependency>
 

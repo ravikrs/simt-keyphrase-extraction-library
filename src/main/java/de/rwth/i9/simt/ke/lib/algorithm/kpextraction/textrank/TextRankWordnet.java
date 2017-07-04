@@ -50,8 +50,8 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwth.i9.cimt.nlp.NLP;
 import de.rwth.i9.simt.ke.lib.model.Keyword;
+import de.rwth.i9.simt.nlp.NLP;
 import net.sf.extjwnl.data.POS;
 
 /**

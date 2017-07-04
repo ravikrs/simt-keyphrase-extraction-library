@@ -11,8 +11,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwth.i9.cimt.nlp.NLP;
 import de.rwth.i9.simt.ke.lib.model.Keyword;
+import de.rwth.i9.simt.nlp.NLP;
 import edu.ehu.galan.rake.RakeAlgorithm;
 import edu.ehu.galan.rake.model.Document;
 import edu.ehu.galan.rake.model.Term;

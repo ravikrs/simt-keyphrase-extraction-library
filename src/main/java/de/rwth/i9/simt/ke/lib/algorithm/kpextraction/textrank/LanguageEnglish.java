@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tartarus.snowball.ext.EnglishStemmer;
 
-import de.rwth.i9.cimt.nlp.opennlp.OpenNLPImplSpring;
+import de.rwth.i9.simt.nlp.opennlp.OpenNLPImplSpring;
 
 /**
  * Implementation of English-specific tools for natural language processing.

@@ -10,8 +10,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwth.i9.cimt.nlp.NLP;
-import de.rwth.i9.cimt.nlp.util.StopWordsEn;
+import de.rwth.i9.simt.nlp.NLP;
+import de.rwth.i9.simt.nlp.util.StopWordsEn;
 
 public class NLPUtil {
 

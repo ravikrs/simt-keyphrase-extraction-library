@@ -15,9 +15,9 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.rwth.i9.cimt.nlp.NLP;
-import de.rwth.i9.cimt.nlp.util.StopWordsEn;
 import de.rwth.i9.simt.ke.lib.model.Keyword;
+import de.rwth.i9.simt.nlp.NLP;
+import de.rwth.i9.simt.nlp.util.StopWordsEn;
 import smile.clustering.SpectralClustering;
 
 public class KeyCluster {

@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import com.apporiented.algorithm.clustering.AverageLinkageStrategy;
 import com.apporiented.algorithm.clustering.Cluster;
 
-import de.rwth.i9.cimt.nlp.NLP;
 import de.rwth.i9.simt.ke.lib.algorithm.clustering.hac.HACClusteringAlgorithm;
 import de.rwth.i9.simt.ke.lib.model.Keyword;
+import de.rwth.i9.simt.nlp.NLP;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer.ALGORITHM;
 
